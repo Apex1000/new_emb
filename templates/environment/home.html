@@ -1,0 +1,73 @@
+{% extends './includes/layout.html' %}
+
+{% block body%} 
+<br>
+<div class="container">
+        <div class="card-deck">
+                <div class="card">
+                  
+                  <div class="card-body">
+                    <h5 class="card-title">Indoor </h5>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                    <a class="btn btn-success pullright" href="\add_room_emd">Add Rooms</a>
+                    <br><br>
+                    <table class="table table-striped">
+                      <tr>
+                        <th>ID</th>
+                        <th>Name of the Institute</th>
+                        <th>Name of ClassRoom</th>
+                        <th></th>
+                        <th></th>
+                      </tr>
+                      {% for name in emd_indoor_room %}
+                      <tr>
+                        <td>{{name.id}}</td>
+                        <td>{{name.name_of_the_institute}}</td>
+                        <td>{{name.name_of_classroom}}</td>
+                        <td><a href="edit_room/{{name.id}}" class="btn btn-default ">Edit</a></td>
+                        <td><a href="#" class="btn btn-danger pullright">Delete</a> </td>
+                      </tr>
+                      {% endfor %}
+                    </table>
+                    <a href="/emd_indoor" class="btn btn-primary">Go Indoor</a>
+                </div>
+                  
+                  <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                  </div>
+                </div>
+                <div class="card">
+                  
+                  <div class="card-body">
+                    <h5 class="card-title">OutDoor</h5>
+                    <p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
+                    <a class="btn btn-success pullright" href="\add_location">Add Locations</a>
+                    <br><br>
+                    <table class="table table-striped">
+                      <tr>
+                        <th>ID</th>
+                        <th>Name of Location</th>
+                        <th>Landmark</th>
+                        <th></th>
+                        <th></th>
+                      </tr>
+                      {% for name in emd_indoor_room %}
+                      <tr>
+                        <td>{{name.id}}</td>
+                        <td>{{name.name_of_the_institute}}</td>
+                        <td>{{name.name_of_classroom}}</td>
+                        <td><a href="edit_room/{{name.id}}" class="btn btn-default ">Edit</a></td>
+                        <td><a href="#" class="btn btn-danger pullright">Delete</a> </td>
+                      </tr>
+                      {% endfor %}
+                    </table>
+                    <a href="/emd_indoor" class="btn btn-primary">Go Outdoor</a>
+                </div>
+                  <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                  </div>
+                </div>
+              </div>
+</div>
+{% endblock %}
+
