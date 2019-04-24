@@ -41,14 +41,30 @@ def register():
     form = RegistrationForm(request.form)
     if request.method == 'POST' and form.validate():
         user = mongo.db.users
-        user.insert_one({'name': form.name.data,'username':form.username.data,'email':form.email.data,'password':form.password.data})
-        return redirect(url_for('index'))
+        existing_user = user.find_one({'email': form.email.data})
+        if existing_user is None:
+            user.insert_one({'name': form.name.data,'username':form.username.data,'email':form.email.data,'password':form.password.data})
+            return redirect(url_for('index'))
         return 'User already registerd'
     return render_template('register.html',form=form)
 # User login
-@app.route('/login')
+
+class LoginForm(Form):
+    email = StringField('Email',[validators.Length(min=6,max=35)])
+    password = PasswordField('Password',[validators.DataRequired()])
+
+@app.route('/login', methods=['GET','POST'])
 def login():
-    return render_template('login.html')
+    form = LoginForm(request.form)
+    if request.method == 'POST': 
+        user = mongo.db.users
+        auth_user = user.find_one({'email':form.email.data})
+        
+        if auth_user:
+            if (auth_user['password'])==(request.form['password']):
+                return redirect(url_for('dashboard'))
+            return 'Password Incorrect'
+    return render_template('login.html',form=form)
 
 @app.route('/add_room_emd')
 def add_room_emd():
