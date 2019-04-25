@@ -18,12 +18,25 @@ def test():
     output = []
 
     for i in db.find():
-        output.append({'name' :i['name'], 'lang':i['lang'] })
+        output.append({'name' :i['name'] })
 
     return jsonify({'result':output})
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# Check if user logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
+
 
 class RegistrationForm(Form):
     name = StringField('Name', [validators.Length(min=2, max=35)])
@@ -62,33 +75,81 @@ def login():
         
         if auth_user:
             if (auth_user['password'])==(request.form['password']):
+                session['username'] = form.email.data
+                session['logged_in'] = True
                 return redirect(url_for('dashboard'))
             return 'Password Incorrect'
     return render_template('login.html',form=form)
 
-@app.route('/add_room_emd')
-def add_room_emd():
-    return render_template('environment/extra/_addroom.html')
-
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You are now logged out','success')
+    return redirect(url_for('login'))
 
 
 # Dashboard
 @app.route('/dashboard')
+@is_logged_in
 def dashboard():
     return render_template('dashboard.html')
 
-#Environment Dashboard
 
+#Environment Dashboard
 @app.route('/allemdboard')
 def allemdboard():
     return render_template('./environment/index.html')
 
-
-
-
-@app.route('/emd')
+@app.route('/emd',methods=['GET'])
 def emd():
-    return render_template('./environment/home.html')
+    indoor_room = mongo.db.indoor_room
+    output=[]
+    for i in indoor_room.find():
+        output.append({'name' :i['name_of_the_institute'] })
+    # return jsonify({'indoor_room':output})
+    return render_template('./environment/home.html',indoor_room=output)
+
+
+
+#Class Add Rooms EMD
+class AddRoomEmd(Form):
+    name_of_the_institute = StringField('Name of the institute', [validators.Length(min=1, max=50)])
+    name_of_classroom = StringField('Name of Classroom', [validators.Length(min=1, max=50)])
+    no_of_occupants = StringField('No of Occupants', [validators.Length(min=1,max=100)])
+    age_range = StringField('Age Range', [validators.Length(min=1,max=100)])
+    size_of_the_room = StringField('Size of the Room', [validators.Length(min=1,max=100)])
+    no_of_windows = StringField('No of Windows', [validators.Length(min=1,max=100)])
+    no_of_doors = StringField('No of Doors', [validators.Length(min=1,max=100)])
+    no_of_ac = StringField('No of AC', [validators.Length(min=1,max=100)])
+    no_of_fan = StringField('No of Fan', [validators.Length(min=1,max=100)])
+    no_of_ac_on_status = StringField('No of ac on Status', [validators.Length(min=1,max=100)])
+    no_of_fan_on_status = StringField('No of Fan on Status', [validators.Length(min=1,max=100)])
+    no_of_open_window = StringField('No of open Window', [validators.Length(min=1,max=100)])
+    no_of_open_doors = StringField('No of open Doors', [validators.Length(min=1,max=100)])
+
+@app.route('/add_room_emd', methods=['GET','POST'])
+def add_room_emd():
+    form = AddRoomEmd(request.form)
+    indoor_room = mongo.db.indoor_room
+    if request.method == 'POST' and form.validate():
+        indoor_room.insert_one({
+        'name_of_the_institute' : form.name_of_the_institute.data,
+        'name_of_classroom' : form.name_of_classroom.data,
+        'no_of_occupants' : form.no_of_occupants.data,
+        'age_range' : form.age_range.data,
+        'size_of_the_room' : form.size_of_the_room.data,
+        'no_of_windows' : form.no_of_windows.data,
+        'no_of_doors' : form.no_of_doors.data,
+        'no_of_ac' : form.no_of_fan.data,
+        'no_of_fan' : form.no_of_ac.data,
+        'no_of_ac_on_status' : form.no_of_ac_on_status.data,
+        'no_of_fan_on_status' : form.no_of_fan_on_status.data,
+        'no_of_open_window' : form.no_of_open_window.data,
+        'no_of_open_doors' : form.no_of_open_doors.data
+        })
+    return render_template('./environment/extra/_addroom.html',form=form)
+
+
 @app.route('/emd_indoor')
 def emd_indoor():
     return render_template('./environment/emd_indoor.html')
@@ -104,4 +165,5 @@ def pointmap():
     return render_template('./roadtraffic/index.html')
 
 if __name__ == '__main__':
+    app.secret_key = 'mysecret'
     app.run(host='0.0.0.0', port=80, debug=True)
