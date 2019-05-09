@@ -1,6 +1,8 @@
 # uDash - Data Visualization
 uDash Web Base Dashboard to visualize the data. Data visualization is the presentation of data in a pictorial or graphical format. It enables decision makers to see analytics presented visually, so they can grasp difficult concepts or identify new patterns. With interactive visualization, you can take the concept a step further by using technology to drill down into charts and graphs for more detail, interactively changing what data you see and how it’s processed.
 
+This is a Python/Flask based webapp use to show diffrent types of data. It store historical data as well as current data.
+
 ## Installation
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the project dependencies
 
@@ -12,4 +14,9 @@ sudo pip install -r requirement.txt
 ```bash
 app.config["MONGO_DNAME"] = "test"
 app.config["MONGO_URI"] = " --- link ---"
+```
+## Run
+Its better to create virtualbox to develop in your machine.
+```bash
+python app.py
 ```

@@ -3,9 +3,12 @@ from flask_pymongo import PyMongo
 from wtforms import Form,StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
+import flask_excel as excel
+import flask_excel
+import pyexcel_xls
 
 app = Flask(__name__)
-
+flask_excel.init_excel(app)
 #MongoDB Config 
 app.config["MONGO_DNAME"] = "test"
 app.config["MONGO_URI"] = "mongodb://apex1000:1234@cluster0-shard-00-00-pykfw.gcp.mongodb.net:27017,cluster0-shard-00-01-pykfw.gcp.mongodb.net:27017,cluster0-shard-00-02-pykfw.gcp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true"
@@ -149,6 +152,39 @@ def add_room_emd():
         })
     return render_template('./environment/extra/_addroom.html',form=form)
 
+@app.route('/upload_box_data', methods=['GET','POST'])
+@is_logged_in
+def upload_box_data():
+    box_data = mongo.db.box_data
+    if request.method == 'POST':
+        output = []
+        c=[]
+        output = request.get_array(field_name='file')
+        for i in output:
+            box_data.insert({  "DATE":"DATE",
+                                "DATA": [{"DATE_TIME": i[0],
+                                            "SL_NO":i[1],
+                                            "PM1":i[2],
+                                            "PM2-5":i[3],
+                                            "PM10":i[4],
+                                            "NO2":i[5],
+                                            "CO2":i[6],
+                                            "CO":i[7],
+                                            "HUMIDITY":i[8],
+                                            "TEMP":i[9]}]
+                                })
+        # box_data.insert({'box':c})
+        # return jsonify({"result": c })
+    return render_template('./environment/upload.html')
+
+
+@app.route('/get_box_data',methods=['GET'])
+def get_box_data():
+    box_data = mongo.db.box_data
+    output = []
+    for i in box_data.find():
+        output.append({'data': i['DATA']})
+    return jsonify({'result' : output})
 
 @app.route('/emd_indoor')
 def emd_indoor():
